@@ -1,7 +1,9 @@
 #include <stdint.h>
 #include <wmmintrin.h>
+#include <emmintrin.h>
+#include <smmintrin.h>
 
-typedef  __m128i block;
+typedef  __m128i block; //a block is 128-bit
 block mRoundKey[11];
 
 static inline block toBlock(uint8_t*data) { return _mm_set_epi64x(((uint64_t*)data)[1], ((uint64_t*)data)[0]);}

@@ -45,9 +45,20 @@ void ntt(uint32_t p[N]) {
 
 int main(int argc, char **argv)
 {
+	double timeSign, timeVer, timeAdd;
+	timeSign = 0.0;
+	timeVer = 0.0;
+	timeAdd = 0.0;
+	clock_t start, start2;
+	clock_t end, end2;
 	unsigned char sk[16] = {0x54, 0xa2, 0xf8, 0x03, 0x1d, 0x18, 0xac, 0x77, 0xd2, 0x53, 0x92, 0xf2, 0x80, 0xb4, 0xb1, 0x2f};
 	block key;
-	uint32_t ii;
+	block* prf_out;
+	unsigned char* prf_out2;
+	prf_out = malloc(8*16);
+	prf_out2 = malloc(8*16);
+
+	uint64_t ii;
 	int pos = 0;
 	//=================
 	uint64_t a,b,c;
@@ -69,10 +80,35 @@ int main(int argc, char **argv)
 	key = toBlock((uint8_t*)sk);
 	setKey(key);
 	
+	ecbEncCounterMode(c,8,prf_out);
+	memcpy(prf_out2, prf_out, 128);
+	
+	printf("prf_out: ");
+	for (int i = 0; i < 128; i++) {
+	  printf("%x", prf_out2[i]);
+	}
+	printf("\n");
+	
+	ecbEncCounterMode(a,8,prf_out);
+	memcpy(prf_out2, prf_out, 128);
+	
+	printf("prf_out: ");
+	for (int i = 0; i < 128; i++) {
+	  printf("%x", prf_out2[i]);
+	}
+	printf("\n");
+	
 	memset(prfin, 0, N);
 	memset(prfout, 0, N);
 	
-	
+	start = clock();
+	for(ii = 0; ii < 1000000; ii++){
+		ecbEncCounterMode(ii,8,prf_out);
+		memcpy(prf_out2, prf_out, 128);
+	}
+	end = clock();
+	timeAdd = timeAdd + (double)(end-start);
+	printf("%fus per AES 8 blocks (generate 1024 bits) \n", ((double) (timeAdd * 1000)) / CLOCKS_PER_SEC / ii * 1000);
 	//Key Generation
 	for(ii = 0; ii < T; ii++){
 		
