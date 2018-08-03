@@ -5,8 +5,8 @@
 ## Debug
 ProjectName            :=Tachyon
 ConfigurationName      :=Debug
-WorkspacePath          :=/home/ozgur/Documents/Tachyon
-ProjectPath            :=/home/ozgur/Documents/Tachyon/Tachyon
+WorkspacePath          :=/media/ozgur/Ubuntu/MyGit/TACHYON/Tachyon
+ProjectPath            :=/media/ozgur/Ubuntu/MyGit/TACHYON/Tachyon/Tachyon
 IntermediateDirectory  :=./Debug
 OutDir                 := $(IntermediateDirectory)
 CurrentFileName        :=
@@ -92,7 +92,7 @@ PreBuild:
 ## Objects
 ##
 $(IntermediateDirectory)/main.c$(ObjectSuffix): main.c $(IntermediateDirectory)/main.c$(DependSuffix)
-	$(CC) $(SourceSwitch) "/home/ozgur/Documents/Tachyon/Tachyon/main.c" $(CFLAGS) $(ObjectSwitch)$(IntermediateDirectory)/main.c$(ObjectSuffix) $(IncludePath)
+	$(CC) $(SourceSwitch) "/media/ozgur/Ubuntu/MyGit/TACHYON/Tachyon/Tachyon/main.c" $(CFLAGS) $(ObjectSwitch)$(IntermediateDirectory)/main.c$(ObjectSuffix) $(IncludePath)
 $(IntermediateDirectory)/main.c$(DependSuffix): main.c
 	@$(CC) $(CFLAGS) $(IncludePath) -MG -MP -MT$(IntermediateDirectory)/main.c$(ObjectSuffix) -MF$(IntermediateDirectory)/main.c$(DependSuffix) -MM main.c
 
@@ -100,7 +100,7 @@ $(IntermediateDirectory)/main.c$(PreprocessSuffix): main.c
 	$(CC) $(CFLAGS) $(IncludePath) $(PreprocessOnlySwitch) $(OutputSwitch) $(IntermediateDirectory)/main.c$(PreprocessSuffix) main.c
 
 $(IntermediateDirectory)/aes.c$(ObjectSuffix): aes.c $(IntermediateDirectory)/aes.c$(DependSuffix)
-	$(CC) $(SourceSwitch) "/home/ozgur/Documents/Tachyon/Tachyon/aes.c" $(CFLAGS) $(ObjectSwitch)$(IntermediateDirectory)/aes.c$(ObjectSuffix) $(IncludePath)
+	$(CC) $(SourceSwitch) "/media/ozgur/Ubuntu/MyGit/TACHYON/Tachyon/Tachyon/aes.c" $(CFLAGS) $(ObjectSwitch)$(IntermediateDirectory)/aes.c$(ObjectSuffix) $(IncludePath)
 $(IntermediateDirectory)/aes.c$(DependSuffix): aes.c
 	@$(CC) $(CFLAGS) $(IncludePath) -MG -MP -MT$(IntermediateDirectory)/aes.c$(ObjectSuffix) -MF$(IntermediateDirectory)/aes.c$(DependSuffix) -MM aes.c
 

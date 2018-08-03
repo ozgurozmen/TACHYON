@@ -46,6 +46,7 @@ void ntt(uint32_t p[N]) {
 int main(int argc, char **argv)
 {
 	unsigned char sk[16] = {0x54, 0xa2, 0xf8, 0x03, 0x1d, 0x18, 0xac, 0x77, 0xd2, 0x53, 0x92, 0xf2, 0x80, 0xb4, 0xb1, 0x2f};
+	block key;
 	uint32_t ii;
 	int pos = 0;
 	//=================
@@ -64,6 +65,9 @@ int main(int argc, char **argv)
 	
 	unsigned char prfin[N];
 	unsigned char prfout[N];
+	
+	key = toBlock((uint8_t*)sk);
+	setKey(key);
 	
 	memset(prfin, 0, N);
 	memset(prfout, 0, N);
