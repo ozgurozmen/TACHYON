@@ -14,6 +14,8 @@
     <File Name="aes.h"/>
     <File Name="ntt.c"/>
     <File Name="ntt.h"/>
+    <File Name="gck.c"/>
+    <File Name="gck.h"/>
   </VirtualDirectory>
   <Settings Type="Executable">
     <GlobalSettings>

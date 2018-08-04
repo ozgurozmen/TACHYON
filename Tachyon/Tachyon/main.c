@@ -32,17 +32,17 @@ int main(int argc, char **argv)
 	i = 0;
 	int pos = 0;
 	//=================
-//	uint64_t a,b,c;
-//	a = 578487198;
-//	b = 1;
-//	c = a*b%Q;
-//	
-//	printf("{");
-//	for (ii = 0; ii < N-1; ++ii) {
-//		b = b*a%Q;
-//		printf("%lu, ", b);
-//	}
-//	printf("};\n");
+	uint64_t a,b,c;
+	a = 578487198;
+	b = 1;
+	c = a*b%Q;
+	
+	printf("{");
+	for (ii = 0; ii < N-1; ++ii) {
+		b = b*a%Q;
+		printf("%lu, ", b);
+	}
+	printf("};\n");
 	//=================
 	
 	unsigned char xi[N*mu*T] = {0}; // this is a 0/1 input array to gck function
@@ -93,9 +93,9 @@ int main(int argc, char **argv)
 		ecbEncCounterMode(i,16,prf_out);
 		memcpy(prf_out2, prf_out, 256);
 		
-		for (unsigned j = 0 ; j<256; j++){
+		for (unsigned int j = 0 ; j<256; j++){
 			shift = (uint8_t)prf_out2[j];
-			for (unsigned k = 0 ; k<8; k++){
+			for (unsigned int k = 0 ; k<8; k++){
 				xi[2048*i + 8*j + k] = bitRead(shift);
 				shift = shiftOne(shift);
 			}
