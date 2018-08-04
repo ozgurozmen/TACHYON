@@ -1,46 +1,14 @@
-#include <stdio.h>
-#include <string.h>
-#include <stdlib.h>
-
-#include <time.h>
 #include "params.h"
 #include "blake2.h"
 #include "aes.h"
+#include "ntt.h"
 
 //#include "iaes_asm_interface.h"
 //#include "iaesni.h"
 
 #include "math.h"
 
-static const uint32_t zetas[N] = {0};
 
-uint32_t montgomery_reduce(uint64_t a) {
-  const uint64_t qinv = QINV; //QINV =  -q^(-1) mod 2^32
-  uint64_t t;
-
-  t = a * qinv;
-  t &= (1ULL << 32) - 1;
-  t *= Q;
-  t = a + t;
-  return t >> 32;
-}
-
-void ntt(uint32_t p[N]) {
-  unsigned int len, start, j, k;
-  uint32_t zeta, t;
-
-  k = 1;
-  for(len = 128; len > 0; len >>= 1) {
-    for(start = 0; start < N; start = j + len) {
-      zeta = zetas[k++]; // zetas -> /* Roots of unity in order needed by forward ntt */
-      for(j = start; j < start + len; ++j) {
-        t = montgomery_reduce((uint64_t)zeta * p[j + len]);
-        p[j + len] = p[j] + 2*Q - t;
-        p[j] = p[j] + t;
-      }
-    }
-  }
-}
 
 
 int main(int argc, char **argv)
@@ -51,14 +19,17 @@ int main(int argc, char **argv)
 	timeAdd = 0.0;
 	clock_t start, start2;
 	clock_t end, end2;
+	uint8_t shift;
 	unsigned char sk[16] = {0x54, 0xa2, 0xf8, 0x03, 0x1d, 0x18, 0xac, 0x77, 0xd2, 0x53, 0x92, 0xf2, 0x80, 0xb4, 0xb1, 0x2f};
 	block key;
 	block* prf_out;
 	unsigned char* prf_out2;
-	prf_out = malloc(8*16);
-	prf_out2 = malloc(8*16);
+	prf_out = malloc(16*16);
+	prf_out2 = malloc(16*16);
 
-	uint64_t ii;
+	uint64_t ii ,i;
+	ii = 0;
+	i = 0;
 	int pos = 0;
 	//=================
 	uint64_t a,b,c;
@@ -80,20 +51,20 @@ int main(int argc, char **argv)
 	key = toBlock((uint8_t*)sk);
 	setKey(key);
 	
-	ecbEncCounterMode(c,8,prf_out);
-	memcpy(prf_out2, prf_out, 128);
+	ecbEncCounterMode(c,16,prf_out);
+	memcpy(prf_out2, prf_out, 256);
 	
 	printf("prf_out: ");
-	for (int i = 0; i < 128; i++) {
+	for (int i = 0; i < 256; i++) {
 	  printf("%x", prf_out2[i]);
 	}
 	printf("\n");
 	
-	ecbEncCounterMode(a,8,prf_out);
-	memcpy(prf_out2, prf_out, 128);
+	ecbEncCounterMode(a,16,prf_out);
+	memcpy(prf_out2, prf_out, 256);
 	
 	printf("prf_out: ");
-	for (int i = 0; i < 128; i++) {
+	for (int i = 0; i < 256; i++) {
 	  printf("%x", prf_out2[i]);
 	}
 	printf("\n");
@@ -103,18 +74,42 @@ int main(int argc, char **argv)
 	
 	start = clock();
 	for(ii = 0; ii < 1000000; ii++){
-		ecbEncCounterMode(ii,8,prf_out);
-		memcpy(prf_out2, prf_out, 128);
+		ecbEncCounterMode(ii,16,prf_out);
+		memcpy(prf_out2, prf_out, 256);
 	}
 	end = clock();
 	timeAdd = timeAdd + (double)(end-start);
-	printf("%fus per AES 8 blocks (generate 1024 bits) \n", ((double) (timeAdd * 1000)) / CLOCKS_PER_SEC / ii * 1000);
+	printf("%fus per AES 16 blocks (generate 2048 bits) \n", ((double) (timeAdd * 1000)) / CLOCKS_PER_SEC / ii * 1000);
+	
+	
+	
+	
+	
 	//Key Generation
-	for(ii = 0; ii < T; ii++){
+	start = clock();
+	for(i = 0; i < T; i++){
+		ecbEncCounterMode(i,16,prf_out);
+		memcpy(prf_out2, prf_out, 256);
 		
+		for (unsigned j = 0 ; j<256; j++){
+			shift = (uint8_t)prf_out2[j];
+			for (unsigned k = 0 ; k<8; k++){
+				xi[2048*i + 8*j + k] = bitRead(shift);
+				shift = shiftOne(shift);
+			}
+		}
 	}
+	end = clock();
+	timeVer = timeVer + (double)(end-start);
+	printf("%fus per AES 16 blocks (generate xi bits) \n", ((double) (timeVer * 1000 * 1000)) / CLOCKS_PER_SEC /  T );
 	
+//	printf("prf_out: ");
+//	for (int i = 0; i < 2048; i++) {
+//	  printf("%x", xi[i]);
+//	}
+//	printf("\n");
 	
-	
+	free(prf_out);
+	free(prf_out2);
 	return 0;
 }
