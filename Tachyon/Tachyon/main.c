@@ -32,15 +32,17 @@ int main(int argc, char **argv)
 	i = 0;
 	int pos = 0;
 	//=================
-	uint64_t a,b,c;
-	a = 2147483648;
-	b = 2147483648;
-	c = a*b%Q;
-	printf("c = %lu", c);
-	
-	for (ii = 0; ii < mu; ++ii) {
-		printf("hello world\n");
-	}
+//	uint64_t a,b,c;
+//	a = 578487198;
+//	b = 1;
+//	c = a*b%Q;
+//	
+//	printf("{");
+//	for (ii = 0; ii < N-1; ++ii) {
+//		b = b*a%Q;
+//		printf("%lu, ", b);
+//	}
+//	printf("};\n");
 	//=================
 	
 	unsigned char xi[N*mu*T] = {0}; // this is a 0/1 input array to gck function
