@@ -30,7 +30,7 @@ int main(int argc, char **argv)
 	prf_out2 = malloc(16*16);
 
 	uint64_t ii ,i;
-	ii = 0;
+	ii = 1;
 	i = 0;
 //	int pos = 0;
 	//=================
@@ -60,36 +60,41 @@ int main(int argc, char **argv)
 	
 	uint32_t *xi; // this is a 0/1 input array to gck function
 	uint32_t yi[N*T] = {0};
-	
+	uint64_t reject = 0;
 	xi = malloc(N*mu*T*sizeof(uint32_t));
 	memset(xi, 0, N*mu*T*sizeof(uint32_t));
 	
-	unsigned char prfin[N];
-	unsigned char prfout[N];
+	uint32_t rPrime[N*mu];
+	uint32_t temp[N*mu];
+	uint32_t r[N];
+	unsigned char rHash[N*4];
+	block cipher[N*mu/4];
+	uint8_t signatureHash[64];
+	uint8_t indexes[64];
+	uint8_t message[2] = {0};
+	uint8_t concatenated[66] = {0};
 	
 	key = toBlock((uint8_t*)sk);
 	setKey(key);
-	
+	uint64_t index;
+	uint64_t counter = 1025;
 
 	
-	memset(prfin, 0, N);
-	memset(prfout, 0, N);
-	
-	start = clock();
-	for(ii = 0; ii < 1000000; ii++){
-		ecbEncCounterMode(ii,16,prf_out);
-		memcpy(prf_out2, prf_out, 256);
-	}
-	end = clock();
-	timeAdd = timeAdd + (double)(end-start);
-	printf("%fus per AES 16 blocks (generate 2048 bits) \n", ((double) (timeAdd * 1000)) / CLOCKS_PER_SEC / ii * 1000);
+
+//	start = clock();
+//	for(ii = 0; ii < 1000000; ii++){
+//		ecbEncCounterMode(ii,16,prf_out);
+//		memcpy(prf_out2, prf_out, 256);
+//	}
+//	end = clock();
+//	timeAdd = timeAdd + (double)(end-start);
+//	printf("%fus per AES 16 blocks (generate 2048 bits) \n", ((double) (timeAdd * 1000)) / CLOCKS_PER_SEC / ii * 1000);
 	
 	
 	
 	
 	
 	//Key Generation
-	start = clock();
 	for(i = 0; i < T; i++){
 		ecbEncCounterMode(i,16,prf_out);
 		memcpy(prf_out2, prf_out, 256);
@@ -106,13 +111,52 @@ int main(int argc, char **argv)
 		gck_linearComb(xi + N*mu*i, yi + N*i);
 		
 	}
+	
+for(ii = 0; ii < 100000; ii++){	
+	//Signature Generation - Sample r' first, add to x_i's and then do the rejection sampling here. Only calculate F_A once.
+	start = clock();
+	ecbEncCounterMode(counter,N*mu/4,cipher);
+	memcpy(rPrime, cipher, N*mu*4);
+	memcpy(temp, cipher, N*mu*4);
+	counter++;
+	
+	gck_ntt(temp);
+	gck_linearComb(temp, r);
+	
+	memcpy(rHash, r, N*4);
+	blake2b(signatureHash, r, NULL, 64, 64, 0);
+	memcpy(concatenated + 2, signatureHash, 64);
+	blake2b(indexes, concatenated, NULL, 64, 66, 0);
+	for(i = 0; i<K; i++){
+		index = (indexes[2*i] + indexes[2*i+1]*256)%1024;
+		ecbEncCounterMode(index,16,prf_out);
+		memcpy(prf_out2, prf_out, 256);
+		
+		for (unsigned int j = 0 ; j<256; j++){
+			shift = (uint8_t)prf_out2[j];
+			for (unsigned int k = 0 ; k<8; k++){
+				rPrime[8*j + k] += bitRead(shift);
+				shift = shiftOne(shift);
+			}
+		}
+	}
+	
+	
+	end = clock();
+	timeSign = timeSign + (double)(end-start);
+	//Signature Verification
+	start = clock();
+
+	
 	end = clock();
 	timeVer = timeVer + (double)(end-start);
-	printf("%fus per AES 16 blocks (generate xi bits) \n", ((double) (timeVer * 1000 * 1000)) / CLOCKS_PER_SEC /  T / ii);
-	//Signature Generation - Sample r' first, add to x_i's and then do the rejection sampling here. Only calculate F_A once.
-
+}	
+	
+	printf("%fus per signature generation\n", ((double) (timeSign * 1000 * 1000)) / CLOCKS_PER_SEC / ii);
+	printf("%fus per verification \n", ((double) (timeVer * 1000 * 1000)) / CLOCKS_PER_SEC / ii );
 	
 	free(prf_out);
 	free(prf_out2);
+	free(xi);
 	return 0;
 }
