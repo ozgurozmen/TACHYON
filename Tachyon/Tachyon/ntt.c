@@ -21,6 +21,7 @@ void ntt(uint32_t p[N]) {
       zeta = zetas[k++]; // zetas -> /* Roots of unity in order needed by forward ntt */
       for(j = start; j < start + len; ++j) {
         t = montgomery_reduce((uint64_t)zeta * p[j + len]);
+//		t = ((uint64_t)zeta * p[j + len])%Q;
         p[j + len] = p[j] + 2*Q - t;
         p[j] = p[j] + t;
       }

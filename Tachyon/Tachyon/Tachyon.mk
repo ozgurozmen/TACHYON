@@ -60,7 +60,7 @@ AS       := as
 ## User defined environment variables
 ##
 CodeLiteDir:=/usr/share/codelite
-Objects0=$(IntermediateDirectory)/main.c$(ObjectSuffix) $(IntermediateDirectory)/aes.c$(ObjectSuffix) $(IntermediateDirectory)/ntt.c$(ObjectSuffix) $(IntermediateDirectory)/gck.c$(ObjectSuffix) 
+Objects0=$(IntermediateDirectory)/main.c$(ObjectSuffix) $(IntermediateDirectory)/aes.c$(ObjectSuffix) $(IntermediateDirectory)/gck.c$(ObjectSuffix) $(IntermediateDirectory)/ntt.c$(ObjectSuffix) 
 
 
 
@@ -107,14 +107,6 @@ $(IntermediateDirectory)/aes.c$(DependSuffix): aes.c
 $(IntermediateDirectory)/aes.c$(PreprocessSuffix): aes.c
 	$(CC) $(CFLAGS) $(IncludePath) $(PreprocessOnlySwitch) $(OutputSwitch) $(IntermediateDirectory)/aes.c$(PreprocessSuffix) aes.c
 
-$(IntermediateDirectory)/ntt.c$(ObjectSuffix): ntt.c $(IntermediateDirectory)/ntt.c$(DependSuffix)
-	$(CC) $(SourceSwitch) "/media/ozgur/Ubuntu/MyGit/TACHYON/Tachyon/Tachyon/ntt.c" $(CFLAGS) $(ObjectSwitch)$(IntermediateDirectory)/ntt.c$(ObjectSuffix) $(IncludePath)
-$(IntermediateDirectory)/ntt.c$(DependSuffix): ntt.c
-	@$(CC) $(CFLAGS) $(IncludePath) -MG -MP -MT$(IntermediateDirectory)/ntt.c$(ObjectSuffix) -MF$(IntermediateDirectory)/ntt.c$(DependSuffix) -MM ntt.c
-
-$(IntermediateDirectory)/ntt.c$(PreprocessSuffix): ntt.c
-	$(CC) $(CFLAGS) $(IncludePath) $(PreprocessOnlySwitch) $(OutputSwitch) $(IntermediateDirectory)/ntt.c$(PreprocessSuffix) ntt.c
-
 $(IntermediateDirectory)/gck.c$(ObjectSuffix): gck.c $(IntermediateDirectory)/gck.c$(DependSuffix)
 	$(CC) $(SourceSwitch) "/media/ozgur/Ubuntu/MyGit/TACHYON/Tachyon/Tachyon/gck.c" $(CFLAGS) $(ObjectSwitch)$(IntermediateDirectory)/gck.c$(ObjectSuffix) $(IncludePath)
 $(IntermediateDirectory)/gck.c$(DependSuffix): gck.c
@@ -122,6 +114,14 @@ $(IntermediateDirectory)/gck.c$(DependSuffix): gck.c
 
 $(IntermediateDirectory)/gck.c$(PreprocessSuffix): gck.c
 	$(CC) $(CFLAGS) $(IncludePath) $(PreprocessOnlySwitch) $(OutputSwitch) $(IntermediateDirectory)/gck.c$(PreprocessSuffix) gck.c
+
+$(IntermediateDirectory)/ntt.c$(ObjectSuffix): ntt.c $(IntermediateDirectory)/ntt.c$(DependSuffix)
+	$(CC) $(SourceSwitch) "/media/ozgur/Ubuntu/MyGit/TACHYON/Tachyon/Tachyon/ntt.c" $(CFLAGS) $(ObjectSwitch)$(IntermediateDirectory)/ntt.c$(ObjectSuffix) $(IncludePath)
+$(IntermediateDirectory)/ntt.c$(DependSuffix): ntt.c
+	@$(CC) $(CFLAGS) $(IncludePath) -MG -MP -MT$(IntermediateDirectory)/ntt.c$(ObjectSuffix) -MF$(IntermediateDirectory)/ntt.c$(DependSuffix) -MM ntt.c
+
+$(IntermediateDirectory)/ntt.c$(PreprocessSuffix): ntt.c
+	$(CC) $(CFLAGS) $(IncludePath) $(PreprocessOnlySwitch) $(OutputSwitch) $(IntermediateDirectory)/ntt.c$(PreprocessSuffix) ntt.c
 
 
 -include $(IntermediateDirectory)/*$(DependSuffix)

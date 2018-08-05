@@ -12,10 +12,10 @@
     <File Name="params.h"/>
     <File Name="aes.c"/>
     <File Name="aes.h"/>
-    <File Name="ntt.c"/>
-    <File Name="ntt.h"/>
     <File Name="gck.c"/>
     <File Name="gck.h"/>
+    <File Name="ntt.c"/>
+    <File Name="ntt.h"/>
   </VirtualDirectory>
   <Settings Type="Executable">
     <GlobalSettings>

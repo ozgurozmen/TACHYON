@@ -12,19 +12,18 @@ void gck_ntt(uint32_t input[N*mu]){
 
 
 //const uint16_t *a, 
-void gck_linearComb(const uint32_t input[N*mu], uint32_t result[N])
-{
-	int i, j;
+void gck_linearComb(const uint32_t input[N*mu], uint32_t result[N]){
+	unsigned int i, j;
 
 	for (j = 0; j < N; ++j)
 	{
-		register uint32_t sum = 0;
-		const register uint32_t *f = input + j;
-		const register uint32_t *k = As + j;
+		unsigned long long sum = 0;
+		const register uint32_t *f = &input[j];
+		const register uint32_t *k = &As[j];
 
 		for (i = 0; i < mu; i++, f += N,k += N)
 		{
-			sum += (*f) * (*k);
+			sum += (uint64_t)(*f) * (*k);
 		}
 
 		result[j] = (sum)%Q;

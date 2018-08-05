@@ -1,4 +1,5 @@
 #include <stdint.h>
+#include "params.h"
 #include <wmmintrin.h>
 #include <emmintrin.h>
 #include <smmintrin.h>
