@@ -9,7 +9,7 @@
 #define PARAMS_H
 
 #ifndef MODE
-#define MODE 2
+#define MODE 0
 #endif
 
 #define N 256U
@@ -47,5 +47,9 @@ static const uint32_t zetas[N] = {0, 578487198, 2084034363, 1548552334, 20190562
 
 #define bitRead(value) ((value) & 0x01)
 #define shiftOne(value) ((value) >> 1)
+
+
+static const uint32_t As[N*mu] = {0};
+
 
 #endif

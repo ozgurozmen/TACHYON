@@ -30,7 +30,7 @@ int main(int argc, char **argv)
 	uint64_t ii ,i;
 	ii = 0;
 	i = 0;
-	int pos = 0;
+//	int pos = 0;
 	//=================
 	uint64_t a,b,c;
 	a = 578487198;
