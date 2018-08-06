@@ -34,11 +34,16 @@ int main(int argc, char **argv)
 
 	
 	uint32_t *xi; // this is a 0/1 input array to gck function
-	uint32_t yi[N*T] = {0};
+	uint32_t *yi;
+	uint32_t vPrime[N] = {0};
+	uint32_t rHat[N] = {0};
 	uint64_t reject = 0;
+	uint64_t verified = 0;
 	uint8_t rejected = 0;
 	xi = malloc(N*mu*T*sizeof(uint32_t));
 	memset(xi, 0, N*mu*T*sizeof(uint32_t));
+	yi = malloc(N*T*sizeof(uint32_t));
+	memset(yi, 0, N*T*sizeof(uint32_t));
 	
 	uint32_t rPrime[N*mu];
 	uint32_t temp[N*mu];
@@ -46,6 +51,7 @@ int main(int argc, char **argv)
 	unsigned char rHash[N*4];
 	block cipher[N*mu/4];
 	uint8_t signatureHash[64];
+	uint8_t signatureHash2[64];
 	uint8_t indexes[64];
 	uint8_t message[2] = {0};
 	uint8_t concatenated[66] = {0};
@@ -108,8 +114,8 @@ for(ii = 0; ii < 100000; ii++){
 	gck_ntt(temp);
 	gck_linearComb(temp, r);
 	
-	memcpy(rHash, r, N*4);
-	blake2b(signatureHash, r, NULL, 64, 64, 0);
+//	memcpy(rHash, r, N*4);
+	blake2b(signatureHash, r, NULL, 64, N*4, 0);
 	memcpy(concatenated + 2, signatureHash, 64);
 	blake2b(indexes, concatenated, NULL, 64, 66, 0);
 	for(i = 0; i<K; i++){
@@ -146,13 +152,47 @@ for(ii = 0; ii < 100000; ii++){
 	rejected = 0;
 	timeSign = timeSign + (double)(end-start);
 	//Signature Verification
-	start = clock();
+	start2 = clock();
+	i=0;
+	while(i<N*mu && rejected == 0){
+		//if((rPrime[i] > maxR || rPrime[i] < K) && rejected == 0){
+		if(rPrime[i]-K>=upperLower){
+			rejected = 1;
+		}
+		i++;
+	}
 	
+//if(!rejected){
+	blake2b(indexes, concatenated, NULL, 64, 66, 0);
 	
-	end = clock();
-	timeVer = timeVer + (double)(end-start);
+	for(i = 0; i<K; i++){
+		index = (indexes[2*i] + indexes[2*i+1]*256)%T;
+		for (unsigned j = 0 ; j<N; j++){	
+			vPrime[j] = (vPrime[j] + yi[index*N+j])%Q;
+		}
+	}
+	
+	gck_ntt(rPrime);
+	gck_linearComb(rPrime, rHat);
+	
+	for (unsigned j = 0 ; j<N; j++){
+		rHat[j] = (rHat[j] + Q - vPrime[j])%Q;
+	}
+	
+	//	memcpy(rHash, r, N*4);
+	blake2b(signatureHash2, rHat, NULL, 64, N*4, 0);
+	
+	if (memcmp(signatureHash,signatureHash2,64) == 0)
+		verified++;
+//}
+	rejected = 0;
+	end2 = clock();
+	timeVer = timeVer + (double)(end2-start2);
+	
+	memset(vPrime, 0, N*sizeof(uint32_t));
 }	
-	printf("%lu signatures out of %lu signatures are rejected", reject, ii);
+	printf("%lu signatures out of %lu signatures are rejected\n", reject, ii);
+	printf("%lu signatures out of %lu signatures are verified\n", verified, ii);
 	printf("%fus per signature generation\n", ((double) (timeSign * 1000 * 1000)) / CLOCKS_PER_SEC / ii);
 	printf("%fus per verification \n", ((double) (timeVer * 1000 * 1000)) / CLOCKS_PER_SEC / ii );
 	
