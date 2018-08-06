@@ -32,21 +32,24 @@ int main(int argc, char **argv)
 	ii = 1;
 	i = 0;
 
+	//CHANGED FROM 32 TO 64 BIT UINT
+	//xi, temp, rPrime
 	
-	uint32_t *xi; // this is a 0/1 input array to gck function
+	uint64_t *xi; // this is a 0/1 input array to gck function
 	uint32_t *yi;
 	uint32_t vPrime[N] = {0};
 	uint32_t rHat[N] = {0};
 	uint64_t reject = 0;
 	uint64_t verified = 0;
 	uint8_t rejected = 0;
-	xi = malloc(N*mu*T*sizeof(uint32_t));
-	memset(xi, 0, N*mu*T*sizeof(uint32_t));
+	xi = malloc(N*mu*T*sizeof(uint64_t));
+	memset(xi, 0, N*mu*T*sizeof(uint64_t));
 	yi = malloc(N*T*sizeof(uint32_t));
 	memset(yi, 0, N*T*sizeof(uint32_t));
 	
 	uint32_t rPrime[N*mu];
-	uint32_t temp[N*mu];
+	uint64_t signature[N*mu];
+	uint64_t temp[N*mu];
 	uint32_t r[N];
 	unsigned char rHash[N*4];
 	block cipher[N*mu/4];
@@ -82,7 +85,7 @@ int main(int argc, char **argv)
 	
 	
 	
-	//Key Generation
+	//Key Generation==========================================================================
 	for(i = 0; i < T; i++){
 		ecbEncCounterMode(i,16,prf_out);
 		memcpy(prf_out2, prf_out, 256);
@@ -95,13 +98,13 @@ int main(int argc, char **argv)
 			}
 		}
 		
-		gck_ntt(xi + N*mu*i);
-		gck_linearComb(xi + N*mu*i, yi + N*i);
+		gck_ntt64(xi + N*mu*i);
+		gck_linearComb64(xi + N*mu*i, yi + N*i);
 		
 	}
 	
 for(ii = 0; ii < 100000; ii++){	
-	//Signature Generation - Sample r' first, add to x_i's and then do the rejection sampling here. Only calculate F_A once.
+	//Signature Generation =================================================================
 	start = clock();
 	ecbEncCounterMode(counter,N*mu/4,cipher);
 	memcpy(rPrime, cipher, N*mu*4);
@@ -111,8 +114,11 @@ for(ii = 0; ii < 100000; ii++){
 	}
 	counter++;
 	
-	gck_ntt(temp);
-	gck_linearComb(temp, r);
+	
+	gck_ntt64(temp);
+	gck_linearComb64(temp, r);
+	
+	block mask = _mm_set_epi8(1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1);
 	
 //	memcpy(rHash, r, N*4);
 	blake2b(signatureHash, r, NULL, 64, N*4, 0);
@@ -121,14 +127,74 @@ for(ii = 0; ii < 100000; ii++){
 	for(i = 0; i<K; i++){
 		index = (indexes[2*i] + indexes[2*i+1]*256)%T;
 		ecbEncCounterMode(index,16,prf_out);
-		memcpy(prf_out2, prf_out, 256);
 		
-		for (unsigned int j = 0 ; j<256; j++){
-			shift = (uint8_t)prf_out2[j];
-			for (unsigned int k = 0 ; k<8; k++){
-				rPrime[8*j + k] += bitRead(shift);
-				shift = shiftOne(shift);
+		//memcpy(prf_out2, prf_out, 256);
+		
+//		for (unsigned int j = 0 ; j<256; j++){
+//			shift = (uint8_t)prf_out2[j];
+//			for (unsigned int k = 0 ; k<8; k++){
+//				rPrime[8*j + k] += bitRead(shift);
+//				shift = shiftOne(shift);
+//			}
+//		}
+
+		for(int h =0; h < 8; ++h){
+			block b[16];
+			b[ 0] = _mm_and_si128(prf_out[ 0], mask);
+			b[ 1] = _mm_and_si128(prf_out[ 1], mask);
+			b[ 2] = _mm_and_si128(prf_out[ 2], mask);
+			b[ 3] = _mm_and_si128(prf_out[ 3], mask);
+			b[ 4] = _mm_and_si128(prf_out[ 4], mask);
+			b[ 5] = _mm_and_si128(prf_out[ 5], mask);
+			b[ 6] = _mm_and_si128(prf_out[ 6], mask);
+			b[ 7] = _mm_and_si128(prf_out[ 7], mask);
+			b[ 8] = _mm_and_si128(prf_out[ 8], mask);
+			b[ 9] = _mm_and_si128(prf_out[ 9], mask);
+			b[10] = _mm_and_si128(prf_out[10], mask);
+			b[11] = _mm_and_si128(prf_out[11], mask);
+			b[12] = _mm_and_si128(prf_out[12], mask);
+			b[13] = _mm_and_si128(prf_out[13], mask);
+			b[14] = _mm_and_si128(prf_out[14], mask);
+			b[15] = _mm_and_si128(prf_out[15], mask);
+			
+			for(int j = 0; j < 16;++j){
+				char* bb = (char*)&(b[j]);
+				rPrime[j * 128 + 8 * 0 + h] +=  bb[0];
+				rPrime[j * 128 + 8 * 1 + h] +=  bb[1];
+				rPrime[j * 128 + 8 * 2 + h] +=  bb[2];
+				rPrime[j * 128 + 8 * 3 + h] +=  bb[3];
+				rPrime[j * 128 + 8 * 4 + h] +=  bb[4];
+				rPrime[j * 128 + 8 * 5 + h] +=  bb[5];
+				rPrime[j * 128 + 8 * 6 + h] +=  bb[6];
+				rPrime[j * 128 + 8 * 7 + h] +=  bb[7];
+				rPrime[j * 128 + 8 * 8 + h] +=  bb[8];
+				rPrime[j * 128 + 8 * 9 + h] +=  bb[9];
+				rPrime[j * 128 + 8 * 10 + h] +=  bb[10];
+				rPrime[j * 128 + 8 * 11 + h] +=  bb[11];
+				rPrime[j * 128 + 8 * 12 + h] +=  bb[12];
+				rPrime[j * 128 + 8 * 13 + h] +=  bb[13];
+				rPrime[j * 128 + 8 * 14 + h] +=  bb[14];
+				rPrime[j * 128 + 8 * 15 + h] +=  bb[15];
 			}
+			prf_out[ 0] = _mm_srli_epi64(prf_out[ 0], 1);
+			prf_out[ 1] = _mm_srli_epi64(prf_out[ 1], 1);
+			prf_out[ 2] = _mm_srli_epi64(prf_out[ 2], 1);
+			prf_out[ 3] = _mm_srli_epi64(prf_out[ 3], 1);
+			prf_out[ 4] = _mm_srli_epi64(prf_out[ 4], 1);
+			prf_out[ 5] = _mm_srli_epi64(prf_out[ 5], 1);
+			prf_out[ 6] = _mm_srli_epi64(prf_out[ 6], 1);
+			prf_out[ 7] = _mm_srli_epi64(prf_out[ 7], 1);
+			prf_out[ 8] = _mm_srli_epi64(prf_out[ 8], 1);
+			prf_out[ 9] = _mm_srli_epi64(prf_out[ 9], 1);
+			prf_out[10] = _mm_srli_epi64(prf_out[10], 1);
+			prf_out[11] = _mm_srli_epi64(prf_out[11], 1);
+			prf_out[12] = _mm_srli_epi64(prf_out[12], 1);
+			prf_out[13] = _mm_srli_epi64(prf_out[13], 1);
+			prf_out[14] = _mm_srli_epi64(prf_out[14], 1);
+			prf_out[15] = _mm_srli_epi64(prf_out[15], 1);
+			
+			
+			
 		}
 	}
 	
@@ -148,10 +214,17 @@ for(ii = 0; ii < 100000; ii++){
 	}
 	
 	
+	
+	
 	end = clock();
 	rejected = 0;
 	timeSign = timeSign + (double)(end-start);
-	//Signature Verification
+	
+	
+	for(i = 0; i<N*mu; i++)
+		signature[i] = rPrime[i];
+	
+	//Signature Verification=====================================
 	start2 = clock();
 	i=0;
 	while(i<N*mu && rejected == 0){
@@ -172,8 +245,8 @@ for(ii = 0; ii < 100000; ii++){
 		}
 	}
 	
-	gck_ntt(rPrime);
-	gck_linearComb(rPrime, rHat);
+	gck_ntt64(signature);
+	gck_linearComb64(signature, rHat);
 	
 	for (unsigned j = 0 ; j<N; j++){
 		rHat[j] = (rHat[j] + Q - vPrime[j])%Q;
@@ -199,5 +272,6 @@ for(ii = 0; ii < 100000; ii++){
 	free(prf_out);
 	free(prf_out2);
 	free(xi);
+	free(yi);
 	return 0;
 }
