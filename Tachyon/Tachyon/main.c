@@ -3,9 +3,6 @@
 #include "aes.h"
 #include "ntt.h"
 #include "gck.h"
-//#include "iaes_asm_interface.h"
-//#include "iaesni.h"
-
 #include "math.h"
 
 
@@ -28,39 +25,18 @@ int main(int argc, char **argv)
 	unsigned char* prf_out2;
 	prf_out = malloc(16*16);
 	prf_out2 = malloc(16*16);
+	
+	
 
 	uint64_t ii ,i;
 	ii = 1;
 	i = 0;
-//	int pos = 0;
-	//=================
-//	uint64_t a,b,c;
-//	a = 578487198;
-//	b = 1;
-//	c = a*b%Q;
-//	
-//	printf("{");
-//	for (ii = 0; ii < N-1; ++ii) {
-//		b = b*a%Q;
-//		printf("%lu, ", b);
-//	}
-//	printf("};\n");
-	
-//	uint32_t random[N*mu];
-//	block cipher[512];
-//	ecbEncCounterMode(1,512,cipher);
-//	memcpy(random, cipher, 8192);
-//	printf("As[N*mu] = {");
-//	for (int i = 0; i < 2048; i++) {
-//	  printf("%u, ", random[i]%Q);
-//	}
-//	printf("};\n");
-	
-	//=================
+
 	
 	uint32_t *xi; // this is a 0/1 input array to gck function
 	uint32_t yi[N*T] = {0};
 	uint64_t reject = 0;
+	uint8_t rejected = 0;
 	xi = malloc(N*mu*T*sizeof(uint32_t));
 	memset(xi, 0, N*mu*T*sizeof(uint32_t));
 	
@@ -80,15 +56,21 @@ int main(int argc, char **argv)
 	uint64_t counter = 1025;
 
 	
-
-//	start = clock();
-//	for(ii = 0; ii < 1000000; ii++){
-//		ecbEncCounterMode(ii,16,prf_out);
-//		memcpy(prf_out2, prf_out, 256);
+//	uint8_t* fastRejection;
+//	fastRejection = malloc(XI+K);
+//	for(i = 0; i < K; i++){
+//		//fastRejection[i] = 1;
+//		printf("%u, ", 1);
 //	}
-//	end = clock();
-//	timeAdd = timeAdd + (double)(end-start);
-//	printf("%fus per AES 16 blocks (generate 2048 bits) \n", ((double) (timeAdd * 1000)) / CLOCKS_PER_SEC / ii * 1000);
+//	for(i = K; i < upperLower+K; i++){
+//		//fastRejection[i] = 0;
+//		printf("%u, ", 0);
+//	}
+//	for(i = upperLower+K; i < XI+K; i++){
+//		//fastRejection[i] = 1;
+//		printf("%u, ", 1);
+//	}
+//	printf("};\n");
 	
 	
 	
@@ -117,7 +99,10 @@ for(ii = 0; ii < 100000; ii++){
 	start = clock();
 	ecbEncCounterMode(counter,N*mu/4,cipher);
 	memcpy(rPrime, cipher, N*mu*4);
-	memcpy(temp, cipher, N*mu*4);
+	for(i = 0; i<N*mu; i++){
+		rPrime[i] = rPrime[i]%XI;
+		temp[i] = rPrime[i];
+	}
 	counter++;
 	
 	gck_ntt(temp);
@@ -128,7 +113,7 @@ for(ii = 0; ii < 100000; ii++){
 	memcpy(concatenated + 2, signatureHash, 64);
 	blake2b(indexes, concatenated, NULL, 64, 66, 0);
 	for(i = 0; i<K; i++){
-		index = (indexes[2*i] + indexes[2*i+1]*256)%1024;
+		index = (indexes[2*i] + indexes[2*i+1]*256)%T;
 		ecbEncCounterMode(index,16,prf_out);
 		memcpy(prf_out2, prf_out, 256);
 		
@@ -141,17 +126,33 @@ for(ii = 0; ii < 100000; ii++){
 		}
 	}
 	
+//	for(i = 0; i<N*mu; i++)
+//		rejected += fastRejection[rPrime[i]];
+//	if(rejected != 0)
+//		reject++;
+	
+	i=0;
+	while(i<N*mu && rejected == 0){
+		//if((rPrime[i] > maxR || rPrime[i] < K) && rejected == 0){
+		if(rPrime[i]-K>=upperLower){
+			reject++;
+			rejected = 1;
+		}
+		i++;
+	}
+	
 	
 	end = clock();
+	rejected = 0;
 	timeSign = timeSign + (double)(end-start);
 	//Signature Verification
 	start = clock();
-
+	
 	
 	end = clock();
 	timeVer = timeVer + (double)(end-start);
 }	
-	
+	printf("%lu signatures out of %lu signatures are rejected", reject, ii);
 	printf("%fus per signature generation\n", ((double) (timeSign * 1000 * 1000)) / CLOCKS_PER_SEC / ii);
 	printf("%fus per verification \n", ((double) (timeVer * 1000 * 1000)) / CLOCKS_PER_SEC / ii );
 	
