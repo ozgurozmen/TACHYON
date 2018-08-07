@@ -103,7 +103,7 @@ int main(int argc, char **argv)
 		
 	}
 	
-for(ii = 0; ii < 10000; ii++){	
+for(ii = 0; ii < 100000; ii++){	
 	//Signature Generation =================================================================
 	start = clock();
 	ecbEncCounterMode(counter,N*mu/4,cipher);

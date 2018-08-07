@@ -47,19 +47,26 @@ void gck_linearComb64(const uint64_t input[N*mu], uint32_t result[N]){
 	{
 		//__uint128_t sum = 0;
 		uint64_t sum = 0;
-		const register uint64_t *f = &input[j];
-		const register uint32_t *k = &As[j];
 
-		for (i = 0; i < mu; i++, f += N,k += N)
-		{
-			//(__uint128_t)
-			//_umul128(takes two uint64_t, gives output of unsigned long long
-			
-			//lazy reduction, do a few and then reduce.
+//		for (i = 0; i < mu; i++, f += N,k += N)
+//		{
+//			//(__uint128_t)
+//			//_umul128(takes two uint64_t, gives output of unsigned long long
+//			
+//			//lazy reduction, do a few and then reduce.
+//			if(MODE == 0)
+//				sum += ((*f) * (*k)); //this unsigned long long does not do anything.
+//			else
+//				sum += ((*f) * (*k))%Q;
+//				
+//			
+//		}
+
+		for (i = 0; i < mu; i++){
 			if(MODE == 0)
-				sum += ((*f) * (*k)); //this unsigned long long does not do anything.
+				sum += (input[i*N] * As[i*N]); //this unsigned long long does not do anything.
 			else
-				sum += ((*f) * (*k))%Q;
+				sum += (input[i*N] * As[i*N])%Q;
 		}
 
 		result[j] = (sum)%Q;

@@ -9,7 +9,7 @@
 #define PARAMS_H
 
 #ifndef MODE
-#define MODE 2
+#define MODE 0
 #endif
 
 #define N 256U
