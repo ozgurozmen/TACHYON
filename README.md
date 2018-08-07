@@ -1,6 +1,6 @@
 # Fast Signatures from Compact Knapsack
 
-This is the implementation of Tachyon (CCS'18), that is a high-speed post-quantum signature. The paper can be found at ...
+This is the implementation of Tachyon (CCS'18), that is a high-speed post-quantum signature. The paper can be found at ... (eprint link will be provided)
 
 ## Tachyon Dependencies
 

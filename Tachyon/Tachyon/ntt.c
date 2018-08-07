@@ -45,7 +45,7 @@ void ntt64(uint64_t p[N]) {
 			t = montgomery_reduce(zeta * p[j + len]); //use if MOD 0 is defined
 		else
 			t = (zeta * p[j + len])%Q;
-        p[j + len] = (p[j] + 2*Q - t);
+        p[j + len] = (p[j] + Q - t);
         p[j] = (p[j] + t);
       }
     }
