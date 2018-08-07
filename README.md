@@ -16,5 +16,7 @@ Please check the licenses for the dependencies before using this code.
 
 Special thanks to Peter Rindal for providing the AES codes (in https://github.com/ladnir/cryptoTools) and the fast bitread operations; and the ntt implementation is adopted from pq-crystals (in https://github.com/pq-crystals/dilithium).
 
+## Contact
 
+Please contact me (ozmenmu@oregonstate.edu) or Rouzbeh Behnia (behniar@oregonstate.edu) for your questions
 
