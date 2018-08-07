@@ -62,7 +62,7 @@ void gck_linearComb64(const uint64_t input[N*mu], uint32_t result[N]){
 				sum += ((*f) * (*k))%Q;
 		}
 
-		result[j] = (sum);
+		result[j] = (sum)%Q;
 	}
 
 }

@@ -39,6 +39,8 @@ void ntt64(uint64_t p[N]) {
     for(start = 0; start < N; start = j + len) {
       zeta = zetas[k++]; // zetas -> /* Roots of unity in order needed by forward ntt */
       for(j = start; j < start + len; ++j) {
+		if(MODE == 2)
+			p[j] = montgomery_reduce(p[j]);
 		if(MODE == 0)
 			t = montgomery_reduce(zeta * p[j + len]); //use if MOD 0 is defined
 		else
