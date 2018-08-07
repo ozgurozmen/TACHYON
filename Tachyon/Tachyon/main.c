@@ -103,7 +103,7 @@ int main(int argc, char **argv)
 		
 	}
 	
-for(ii = 0; ii < 100000; ii++){	
+for(ii = 0; ii < 10000; ii++){	
 	//Signature Generation =================================================================
 	start = clock();
 	ecbEncCounterMode(counter,N*mu/4,cipher);
@@ -128,7 +128,7 @@ for(ii = 0; ii < 100000; ii++){
 		index = (indexes[2*i] + indexes[2*i+1]*256)%T;
 		ecbEncCounterMode(index,16,prf_out);
 		
-		//memcpy(prf_out2, prf_out, 256);
+//		memcpy(prf_out2, prf_out, 256);
 		
 //		for (unsigned int j = 0 ; j<256; j++){
 //			shift = (uint8_t)prf_out2[j];
