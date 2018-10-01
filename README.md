@@ -1,6 +1,6 @@
 # Fast Signatures from Compact Knapsack
 
-This is the proof-of-concept implementation of Tachyon (CCS'18), that is a high-speed post-quantum signature. The paper can be found at ... (eprint link will be provided)
+This is the proof-of-concept implementation of Tachyon (CCS'18), that is a high-speed post-quantum signature. The paper can be found at https://eprint.iacr.org/2018/873.pdf
 
 Note: I highly recommend using CodeLite to run this code (http://codelite.org).
 
